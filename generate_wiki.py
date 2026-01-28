@@ -43,8 +43,16 @@ try:
     property_template = env.get_template("property.html")
     viz_template = env.get_template("visualizations.html")
     network_template = env.get_template(f"network_{GRAPH.value}.html")
+    
+except jinja2.TemplateNotFound as e:
+    print(f"Could not find template file: {e.name}")
+    exit(1)
+except jinja2.TemplateSyntaxError as e:
+    print(f"Syntax error in template file: {e.filename} at line {e.message}")
+    exit(1)
 except Exception as e:
-    print(f"Template Error: {e}")
+    import traceback
+    traceback.print_exc()
     exit(1)
 
 os.makedirs(f"{OUTPUT}/entities", exist_ok=True)
