@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Instance Network Explorer</title>
+  <link rel="stylesheet" href="static/style.css">
+    
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+<style>
+    /* --- Styles spécifiques pour la page Réseau --- */
+    
+    /* Le conteneur prend presque toute la hauteur de l'écran pour une immersion totale */
+    .graph-container {
+        height: 85vh; /* 85% de la hauteur de la fenêtre */
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .graph-header {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        flex-shrink: 0; /* L'en-tête ne rétrécit pas */
+    }
+    .graph-header h2 { margin: 0; font-size: 1.25rem; color: #333; }
+    .graph-header p { margin: 5px 0 0; color: #666; font-size: 0.9rem; }
+
+    /* Zone de dessin du graphe */
+    .mermaid-wrapper {
+        flex-grow: 1; /* Prend tout l'espace restant */
+        background-color: #ffffff;
+        position: relative;
+        overflow: hidden; 
+    }
+    
+    .mermaid {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* =========================================
+       STYLES MERMAID (Identiques à visualizations.html)
+       ========================================= */
+
+    /* Lignes et Flèches (Gris par défaut) */
+    .mermaid .edgePath path {
+        stroke: #666 !important;
+        stroke-width: 1.5px !important;
+    }
+    .mermaid marker path {
+        fill: #666 !important;
+        stroke: #666 !important;
+    }
+
+    /* Étiquettes sur les liens (Fond blanc pour lisibilité) */
+    .mermaid .edgeLabel {
+        background-color: white !important;
+        opacity: 1 !important;
+        color: #333 !important;
+        padding: 2px 4px !important;
+        border-radius: 4px !important;
+    }
+    .mermaid .edgeLabel rect {
+        fill: #ffffff !important;
+        opacity: 1 !important;
+    }
+    .mermaid .edgeLabel p, 
+    .mermaid .edgeLabel span {
+        background-color: white !important;
+        color: #333 !important;
+    }
+
+    /* Noeuds (Orange par défaut) */
+    .node rect, .node polygon, .node circle {
+        fill: #ff6b35 !important;
+        stroke: #e55a2b !important;
+    }
+    .node text {
+        fill: white !important;
+        font-weight: bold !important;
+        font-family: sans-serif;
+    }
+    
+    /* Correctif SVG pour le PanZoom */
+    svg {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+    }
+</style>
+
+</head>
+<body>
+  <nav>
+    <a href="index.html">🏠 Home</a>
+    <a href="visualizations.html">📊 Visualizations</a>
+    <a href="network.html">🕸️ Instance Network</a> </nav>
+  </nav>
+  <main>
+    
+<h1>🕸️ Instance Network Explorer</h1>
+<p>Interactive visualization of all instances and their relationships.</p>
+
+<div class="graph-container">
+    <div class="graph-header">
+        <h2>Global Network</h2>
+        <p>Utilisez la molette pour zoomer, et glissez-déposez pour vous déplacer.</p>
+    </div>
+
+    <div class="mermaid-wrapper">
+        <div class="mermaid">
+graph LR
+    %%{init: {"flowchart": {"nodeSpacing": 50, "rankSpacing": 80, "curve": "basis"}}}%%
+    classDef instanceNode fill:#ff6b35,stroke:#e55a2b,stroke-width:2px,color:#fff
+    Arthur["Arthur"]:::instanceNode
+    click Arthur "entities/Arthur.html"
+    BatonMagique["BatonMagique"]:::instanceNode
+    click BatonMagique "entities/BatonMagique.html"
+    ChateauRoyal["ChateauRoyal"]:::instanceNode
+    click ChateauRoyal "entities/ChateauRoyal.html"
+    Excalibur["Excalibur"]:::instanceNode
+    click Excalibur "entities/Excalibur.html"
+    ForetSombre["ForetSombre"]:::instanceNode
+    click ForetSombre "entities/ForetSombre.html"
+    Gobelin01["Gobelin01"]:::instanceNode
+    click Gobelin01 "entities/Gobelin01.html"
+    Merlin["Merlin"]:::instanceNode
+    click Merlin "entities/Merlin.html"
+    Mordred["Mordred"]:::instanceNode
+    click Mordred "entities/Mordred.html"
+    Arthur -- "est_ennemi_de" --> Mordred
+    Arthur -- "est_ennemi_de" --> Mordred
+    Arthur -- "possede" --> Excalibur
+    Arthur -- "vit_dans" --> ChateauRoyal
+    Gobelin01 -- "vit_dans" --> ForetSombre
+    Merlin -- "possede" --> BatonMagique
+    Merlin -- "vit_dans" --> ChateauRoyal
+    Mordred -- "est_ennemi_de" --> Arthur
+    Mordred -- "est_ennemi_de" --> Arthur
+    Mordred -- "vit_dans" --> ForetSombre
+    linkStyle 0 stroke:#999,stroke-width:1px;
+    linkStyle 1 stroke:#999,stroke-width:1px;
+    linkStyle 2 stroke:#999,stroke-width:1px;
+    linkStyle 3 stroke:#999,stroke-width:1px;
+    linkStyle 4 stroke:#999,stroke-width:1px;
+    linkStyle 5 stroke:#999,stroke-width:1px;
+    linkStyle 6 stroke:#999,stroke-width:1px;
+    linkStyle 7 stroke:#999,stroke-width:1px;
+    linkStyle 8 stroke:#999,stroke-width:1px;
+    linkStyle 9 stroke:#999,stroke-width:1px;
+        </div>
+    </div>
+</div>
+
+  </main>
+  
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+    // 1. Configuration de Mermaid
+    mermaid.initialize({ 
+        startOnLoad: false, 
+        theme: 'base',
+        securityLevel: 'loose',
+        flowchart: {
+            useMaxWidth: false, // Important pour le pan/zoom
+            htmlLabels: true
+        },
+        themeVariables: {
+            primaryColor: '#ff6b35',
+            lineColor: '#666666',
+            fontFamily: 'sans-serif'
+        }
+    });
+
+    // 2. Rendu et Activation du Zoom
+    await mermaid.run({
+        querySelector: '.mermaid',
+        postRenderCallback: (id) => {
+            const div = document.getElementById(id);
+            const svg = div.tagName === 'svg' ? div : div.querySelector('svg');
+
+            if (svg) {
+                // S'assurer que le SVG remplit le conteneur
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                
+                // Initialiser svg-pan-zoom
+                svgPanZoom(svg, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: true,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.1,
+                    maxZoom: 10
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

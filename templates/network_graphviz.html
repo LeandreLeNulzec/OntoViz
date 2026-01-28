@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Static Network{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+<style>
+    .graph-container {
+        height: 85vh;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        overflow: hidden; /* Important pour le zoom */
+    }
+    /* Style pour s'assurer que le SVG prend toute la place */
+    .graph-container svg {
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Les polygones (noeuds) changent de curseur au survol car ils sont cliquables */
+    g.node { cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>🕸️ Global Network (Static)</h1>
+<p>Generated via Graphviz (Neato layout).</p>
+
+<div class="graph-container" id="svg-container">
+    {{ instance_network | safe }}
+</div>
+
+<script>
+    // Activation du Zoom sur le SVG Graphviz
+    window.onload = function() {
+        var svgElement = document.querySelector('#svg-container svg');
+        if (svgElement) {
+            svgPanZoom(svgElement, {
+                zoomEnabled: true,
+                controlIconsEnabled: true,
+                fit: true,
+                center: true
+            });
+        }
+    };
+</script>
+{% endblock %}
