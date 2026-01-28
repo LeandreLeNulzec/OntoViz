@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Network Explorer</title>
+  <link rel="stylesheet" href="static/style.css">
+    
+<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<style>
+    /* Le conteneur prend une grande partie de l'écran */
+    #mynetwork {
+        width: 100%;
+        height: 85vh;
+        border: 1px solid #ddd;
+        background-color: #ffffff;
+        border-radius: 8px;
+    }
+    
+    /* Légende personnalisée simple */
+    .legend-container {
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 0.9em;
+    }
+    .badge {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+</style>
+
+</head>
+<body>
+  <nav>
+    <a href="index.html">🏠 Home</a>
+    <a href="visualizations.html">📊 Visualizations</a>
+    <a href="network.html">🕸️ Instance Network</a> </nav>
+  </nav>
+  <main>
+    
+<h1>🕸️ Instance Network Explorer</h1>
+<p>Interactive visualization. Scroll to zoom, drag nodes to reorganize.</p>
+
+<div class="legend-container">
+    <strong>Key Entities:</strong> &nbsp;
+    <span class="badge" style="background:#ff6b35;"></span>Criteria &nbsp;
+    <span class="badge" style="background:#20c997;"></span>Metric &nbsp;
+    <span class="badge" style="background:#6f42c1;"></span>Definitions
+</div>
+
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    // 1. Récupération des données injectées par Python
+    var rawData = {"nodes": [{"id": "Arthur", "label": "Arthur", "group": "Hero", "title": "Arthur (Hero)"}, {"id": "Excalibur", "label": "Excalibur", "group": "Weapon", "title": "Excalibur (Weapon)"}, {"id": "Merlin", "label": "Merlin", "group": "Hero", "title": "Merlin (Hero)"}, {"id": "MagicStaff", "label": "MagicStaff", "group": "Weapon", "title": "MagicStaff (Weapon)"}, {"id": "RoyalCastle", "label": "RoyalCastle", "group": "Location", "title": "RoyalCastle (Location)"}, {"id": "Mordred", "label": "Mordred", "group": "Monster", "title": "Mordred (Monster)"}, {"id": "DarkForest", "label": "DarkForest", "group": "Location", "title": "DarkForest (Location)"}, {"id": "Goblin01", "label": "Goblin01", "group": "Monster", "title": "Goblin01 (Monster)"}], "edges": [{"from": "Arthur", "to": "Excalibur", "label": "possesses", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Merlin", "to": "MagicStaff", "label": "possesses", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Arthur", "to": "RoyalCastle", "label": "livesIn", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Merlin", "to": "RoyalCastle", "label": "livesIn", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Mordred", "to": "DarkForest", "label": "livesIn", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Goblin01", "to": "DarkForest", "label": "livesIn", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Arthur", "to": "Mordred", "label": "isEnemyOf", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Mordred", "to": "Arthur", "label": "isEnemyOf", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Mordred", "to": "Arthur", "label": "isEnemyOf", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}, {"from": "Arthur", "to": "Mordred", "label": "isEnemyOf", "color": {"color": "#848484"}, "width": 1, "dashes": false, "arrows": "to", "font": {"align": "middle", "size": 10}}]};
+    
+    var nodes = new vis.DataSet(rawData.nodes);
+    var edges = new vis.DataSet(rawData.edges);
+
+    var container = document.getElementById('mynetwork');
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+
+    // 2. Configuration de Vis.js
+    var options = {
+        nodes: {
+            shape: 'dot',
+            size: 20,
+            font: {
+                size: 14,
+                color: '#333' // Texte sombre
+            },
+            borderWidth: 2,
+            shadow: true
+        },
+        edges: {
+            width: 1,
+            smooth: {
+                type: 'continuous' // Courbes fluides
+            }
+        },
+        physics: {
+            enabled: true,
+            stabilization: false, // Permet de voir le graphe bouger au chargement
+            barnesHut: {
+                gravitationalConstant: -4000, // Répulsion forte pour écarter les noeuds
+                centralGravity: 0.3,
+                springLength: 150, // Longueur des liens
+                springConstant: 0.04,
+                damping: 0.09
+            }
+        },
+        // 3. Définition des Couleurs par Groupes (Classes de l'ontologie)
+        groups: {
+            Criteria: { 
+                color: { background: '#ff6b35', border: '#e55a2b' }, 
+                shape: 'dot' 
+            },
+            Metric: { 
+                color: { background: '#20c997', border: '#1aa179' }, 
+                shape: 'diamond' // Forme différente pour les métriques
+            },
+            Fairness: {
+                color: { background: '#6f42c1', border: '#5a32a3' }
+            },
+            // Style par défaut pour tout le reste
+            Default: { 
+                color: { background: '#97c2fc', border: '#2b7ce9' } 
+            }
+        },
+        interaction: {
+            navigationButtons: true,
+            keyboard: false,
+            tooltipDelay: 200
+        }
+    };
+
+    var network = new vis.Network(container, data, options);
+    
+    // Double-clic pour ouvrir la page de l'entité
+    network.on("doubleClick", function (params) {
+        if (params.nodes.length === 1) {
+            var nodeId = params.nodes[0];
+            window.location.href = "entities/" + nodeId + ".html";
+        }
+    });
+</script>
+
+  </main>
+  
+</body>
+</html>

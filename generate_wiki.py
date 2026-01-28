@@ -1,22 +1,25 @@
 from owlready2 import * # type: ignore
-from jinja2 import Environment, FileSystemLoader
+import jinja2
 import os
 import sys
+import argparse
 from graph import *
 
-ONTOLOGY_PATH = sys.argv[1]
-OUTPUT = "wiki"
-GRAPH = Graphs.Mermaid
-for i in range(2,len(sys.argv)):
-    match sys.argv[i]:
-        case "-o":
-            OUTPUT = sys.argv[i+1]
-        case "-g":
-            if(not (sys.argv[i+1].lower() in [member.value for member in Graphs])):
-                print(f"Error ! The graph intance choice should be among : {[member.value for member in Graphs]}")
-                exit(1)
-            else:
-                GRAPH = Graphs(sys.argv[i+1].lower())
+
+parser=argparse.ArgumentParser(prog='OntoViz')
+
+parser.add_argument("onto_path", help="Path to the ontology file")
+parser.add_argument("-o","--output", default="wiki", help="Output directory of the wiki. (default=wiki)")
+parser.add_argument("-g","--graph",
+                    choices=[member.value for member in Graphs],
+                    default=Graphs.Mermaid.value,
+                    help="Instance graph visualization method. (default=mermaid)")
+
+args = parser.parse_args()
+
+ONTOLOGY_PATH = args.onto_path
+OUTPUT = args.output
+GRAPH = Graphs(args.graph)
 
 try:
     onto = get_ontology(ONTOLOGY_PATH).load() # type: ignore
@@ -32,7 +35,7 @@ except Exception as e:
     NAME = "Ontology visualiser"
 
 
-env = Environment(loader=FileSystemLoader("templates"))
+env = jinja2.Environment(loader=jinja2.FileSystemLoader("templates"))
 try:
     index_template = env.get_template("index.html")
     entity_template = env.get_template("entity.html")
