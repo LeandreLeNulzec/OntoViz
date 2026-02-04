@@ -1,4 +1,4 @@
-from owlready2 import * # type: ignore
+import owlready2
 import jinja2
 import os
 import sys
@@ -20,6 +20,7 @@ args = parser.parse_args()
 ONTOLOGY_PATH = args.onto_path
 OUTPUT = args.output
 GRAPH = Graphs(args.graph)
+CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 try:
     onto = get_ontology(ONTOLOGY_PATH).load() # type: ignore
@@ -34,8 +35,7 @@ except Exception as e:
     print("Error loading the ontology label, fallbacking to default name :\"Ontology Visualizer\"")
     NAME = "Ontology visualiser"
 
-
-env = jinja2.Environment(loader=jinja2.FileSystemLoader("templates"))
+env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(CURRENT_DIRECTORY,"templates")))
 try:
     index_template = env.get_template("index.html")
     entity_template = env.get_template("entity.html")
@@ -57,8 +57,8 @@ except Exception as e:
 
 os.makedirs(f"{OUTPUT}/entities", exist_ok=True)
 os.makedirs(f"{OUTPUT}/static", exist_ok=True)
-if os.path.exists("static/style.css"):
-    os.system(f"cp static/style.css {OUTPUT}/static/style.css")
+if os.path.exists(os.path.join(CURRENT_DIRECTORY,"static/style.css")):
+    os.system(f"cp {CURRENT_DIRECTORY}/static/style.css {OUTPUT}/static/style.css")
 
 def write_entity_page(entity, template):
     """Writes individual HTML pages for entities."""
@@ -68,10 +68,10 @@ def write_entity_page(entity, template):
         label=label(entity),
         uri=entity.iri,
         comment=comment(entity),
-        types=[label(t) for t in entity.is_a if not isinstance(t, (Restriction,Or,And))],
+        types=[label(t) for t in entity.is_a if not isinstance(t, (owlready2.Restriction,owlready2.Or,owlready2.And))],
         relations=rels[entity],
         anti_rels=anti[entity],
-        individuals= class_dic[entity] if entity in classes else (prop_dic[entity] if entity in properties else [])
+        individuals= class_dic[entity] if entity in classes else (prop_dic[entity] if entity in object_properties else [])
     )
     with open(f"{OUTPUT}/entities/{fname}", "w", encoding="utf-8") as f:
         f.write(html)
@@ -79,15 +79,16 @@ def write_entity_page(entity, template):
 
 
 classes = [c for c in onto.classes() if PREFIX in c.iri]
-properties = [p for p in onto.object_properties() if PREFIX in p.iri]
+object_properties = [p for p in onto.object_properties() if PREFIX in p.iri]
+data_properties = [p for p in onto.data_properties() if PREFIX in p.iri]
 individuals = [i for i in onto.individuals() if PREFIX in i.iri]
 
 class_dic = {c: [label(i) for i in c.instances() if i.iri.startswith(PREFIX)] for c in classes}
 
-rels = {ent: [] for ent in classes + properties + individuals}
-anti = {ent: [] for ent in classes + properties + individuals}
-prop_dic = {p: [] for p in properties}
-for prop in properties:
+rels = {ent: [] for ent in classes + object_properties + individuals}
+anti = {ent: [] for ent in classes + object_properties + individuals}
+prop_dic = {p: [] for p in object_properties}
+for prop in object_properties:
     for s, o in prop.get_relations():
         prop_dic[prop].append((label(s), label(o)))
         rels[s].append((label(prop), label(o)))
@@ -97,7 +98,7 @@ for prop in properties:
 for c in classes:
     write_entity_page(c, class_template)
     
-for p in properties:
+for p in object_properties:
     write_entity_page(p, property_template)
     
 for i in individuals:
@@ -106,7 +107,7 @@ for i in individuals:
 
 viz_html = viz_template.render(
     class_hierarchy=generate_class_hierarchy_mermaid(classes,PREFIX),
-    property_graph=generate_property_graph_mermaid(classes, properties,PREFIX)
+    property_graph=generate_property_graph_mermaid(classes, object_properties,PREFIX)
 )
 
 with open(f"{OUTPUT}/visualizations.html", "w", encoding="utf-8") as f:
@@ -115,11 +116,11 @@ with open(f"{OUTPUT}/visualizations.html", "w", encoding="utf-8") as f:
 match GRAPH:
     case Graphs.Mermaid:
         viz_network = network_template.render(
-            instance_network=generate_instance_network_mermaid(individuals, properties))
+            instance_network=generate_instance_network_mermaid(individuals, object_properties))
     
     case Graphs.VisJs:
         viz_network = network_template.render(
-            instance_network=generate_instance_network_visjs(individuals, properties))
+            instance_network=generate_instance_network_visjs(individuals, object_properties))
     
     # case Graphs.GraphViz:
     #     viz_network = network_graphviz_template.render(
@@ -131,7 +132,7 @@ with open(f"{OUTPUT}/network.html", "w", encoding="utf-8") as f:
 index_html = index_template.render(
     title=NAME,
     classes=[{"label": label(c), "file": f"{safe_id(label(c))}.html"} for c in classes],
-    properties=[{"label": label(p), "file": f"{safe_id(label(p))}.html"} for p in properties],
+    properties=[{"label": label(p), "file": f"{safe_id(label(p))}.html"} for p in object_properties],
     individuals=[{"label": label(i), "file": f"{safe_id(label(i))}.html"} for i in individuals]
 )
 with open(f"{OUTPUT}/index.html", "w", encoding="utf-8") as f:
