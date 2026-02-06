@@ -16,6 +16,15 @@
 </ul>
 {% endif %}
 
+{% if data_rels %}
+<h2>Attributes</h2>
+<ul>
+  {% for pred, obj in data_rels %}
+  <li> {% if "#" not in pred %}<a href="{{ pred }}.html">{{ pred }}</a> {%else%} {{pred}} {%endif%} →  {{obj}}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
 {% if relations %}
 <h2>Relations</h2>
 <ul>

@@ -1,4 +1,4 @@
-import owlready2
+import owlready2 # type: ignore
 import jinja2
 import os
 import sys
@@ -71,6 +71,7 @@ def write_entity_page(entity, template):
         types=[label(t) for t in entity.is_a if not isinstance(t, (owlready2.Restriction,owlready2.Or,owlready2.And))],
         relations=rels[entity],
         anti_rels=anti[entity],
+        data_rels=data_rels[entity],
         individuals= class_dic[entity] if entity in classes else (prop_dic[entity] if entity in object_properties else [])
     )
     with open(f"{OUTPUT}/entities/{fname}", "w", encoding="utf-8") as f:
@@ -85,9 +86,11 @@ individuals = [i for i in onto.individuals() if PREFIX in i.iri]
 
 class_dic = {c: [label(i) for i in c.instances() if i.iri.startswith(PREFIX)] for c in classes}
 
-rels = {ent: [] for ent in classes + object_properties + individuals}
-anti = {ent: [] for ent in classes + object_properties + individuals}
-prop_dic = {p: [] for p in object_properties}
+rels = {ent: [] for ent in classes + object_properties + data_properties + individuals}
+data_rels = {ent: [] for ent in classes + object_properties + data_properties + individuals}
+anti = {ent: [] for ent in classes + object_properties + data_properties + individuals}
+prop_dic = {p: [] for p in object_properties + data_properties}
+
 for prop in object_properties:
     for s, o in prop.get_relations():
         prop_dic[prop].append((label(s), label(o)))
@@ -95,10 +98,15 @@ for prop in object_properties:
         anti[o].append((label(s), label(prop)))
 
 
+for prop in data_properties:
+    for s, o in prop.get_relations():
+        prop_dic[prop].append((label(s), label(o)))
+        data_rels[s].append((label(prop), label(o)))
+
 for c in classes:
     write_entity_page(c, class_template)
     
-for p in object_properties:
+for p in object_properties + data_properties:
     write_entity_page(p, property_template)
     
 for i in individuals:
