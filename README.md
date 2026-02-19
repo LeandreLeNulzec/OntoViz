@@ -40,6 +40,7 @@ python generate_wiki.py <path_to_ontology_file> [options]
 ### Options:
 * `onto_path`: **(Required)** Path to your ontology file (e.g., `example.rdf`).
 * `-o`, `--output`: Set the output directory for the wiki files (default: `wiki`).
+* `-n`, `--name`: Set the name of the Ontology (default: `Ontology Visualiser`).
 * `-g`, `--graph`: Select the instance network engine. Choices: `mermaid` (default) or `visjs`.
 
 ## Generative AI Disclosure

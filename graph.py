@@ -1,26 +1,13 @@
 from owlready2 import * # type: ignore
-import re
 import json
 from enum import Enum
+from utils import safe_id,label
 # import graphviz
 
 class Graphs(Enum):
     Mermaid = "mermaid"
     VisJs = "visjs"
     #GraphViz = "graphviz"
-
-def safe_id(text):
-    """Sanitizes strings for Mermaid Node IDs (alphanumeric only)."""
-    return re.sub(r'[\W_]+', '', str(text))
-
-def label(x):
-    """Robust labeling."""
-    if hasattr(x, "label") and x.label: return x.label[0]
-    if hasattr(x, "name"): return x.name
-    return str(x)
-
-def comment(x):
-    return str(x.comment[0]) if hasattr(x, "comment") and x.comment else ""
 
 def generate_class_hierarchy_mermaid(classes,prefix):
     lines = ["graph TD"]
@@ -76,8 +63,8 @@ def generate_property_graph_mermaid(classes, properties,prefix):
                     rels_to_draw.append((cls, target, prop))
 
     for prop in properties:
-        domains = [d for d in prop.domain if isinstance(d, ThingClass) and prefix in d.iri]
-        ranges = [r for r in prop.range if isinstance(r, ThingClass) and prefix in r.iri]
+        domains = [d for d in prop.domain if prefix in d.iri]
+        ranges = [r for r in prop.range if prefix in r.iri]
         for d in domains:
             for r in ranges:
                 rels_to_draw.append((d, r, prop))
